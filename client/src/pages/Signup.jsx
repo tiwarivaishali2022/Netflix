@@ -1,20 +1,19 @@
-import React, { useState } from "react";
+import  { createUserWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
+import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import BackgroundImage from "../components/BackgroundImage";
 import Header from "../components/Header";
-import  { createUserWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
 import  { firebaseAuth } from "../utils/firebase-config";
-import { useNavigate } from "react-router-dom";
 
 export default function Signup() {
-  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
-  
-
   const [formValues, setFormValues] = useState({
     email: "",
     password: "",
   });
+  const navigate = useNavigate();
+
 
   const handleSignIn = async () => {
     try {
@@ -25,9 +24,18 @@ export default function Signup() {
     }
   };
 
-  onAuthStateChanged(firebaseAuth,(currentUser)=> {
-    if(currentUser) navigate("/");
-  })
+  // onAuthStateChanged(firebaseAuth,(currentUser)=> {
+  //   if(currentUser) navigate("/");
+  // })
+
+  useEffect(() => {
+
+  const user = onAuthStateChanged(firebaseAuth, (currentUser) => {
+    if (currentUser) navigate("/");
+  });
+
+  return () => user();
+}, [navigate]);
 
   return (
     <Container showPassword={showPassword}>
@@ -69,7 +77,8 @@ export default function Signup() {
               <button onClick={() => setShowPassword(true)}>Get Started</button>
             )}
           </div>
-          <button onClick={handleSignIn}>SignUp</button>
+          {showPassword &&
+          <button onClick={handleSignIn}>Signup</button>}
         </div>
       </div>
     </Container>
@@ -99,8 +108,7 @@ const Container = styled.div`
       }
       .form {
         display: grid;
-        grid-template-columns: ${({ showPassword }) =>
-          showPassword ? "1fr 1fr" : "2fr 1fr"};
+        grid-template-columns: 1fr 1fr
         width: 60%;
         input {
           color: black;
